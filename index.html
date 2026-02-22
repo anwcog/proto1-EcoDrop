@@ -73,12 +73,24 @@
     <div id="yourPoints">
       ⭐ Your Points: <span id="pointsDisplay">0</span>
     </div>
+    <div id="yourLeague" style="text-align:center; margin:10px 0; font-size:18px;">
+      League: <span id="leagueDisplay">🥉 Bronze</span>
+    </div>
 
     <!-- Image Upload -->
     <div class="upload-wrapper"> 
       <label for="rewardUpload" class="upload-area"> 
         <span class="plus">+</span> <input type="file" id="rewardUpload" accept="image/*" onchange="handleUpload(event)" hidden>
       </label>
+    </div>
+
+    <!-- League Guide -->
+    <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin:15px 0; font-size:13px;">
+      <strong style="display:block; margin-bottom:10px;">Points Per Image by League:</strong>
+      <div style="display:flex; align-items:center; margin:5px 0;"><span style="font-size:20px; margin-right:8px;">🥉</span> <strong>Bronze (0-9):</strong> <span style="margin-left:8px;">1 pt/image</span></div>
+      <div style="display:flex; align-items:center; margin:5px 0;"><span style="font-size:20px; margin-right:8px;">🥈</span> <strong>Silver (10-24):</strong> <span style="margin-left:8px;">2 pts/image</span></div>
+      <div style="display:flex; align-items:center; margin:5px 0;"><span style="font-size:20px; margin-right:8px;">🥇</span> <strong>Gold (25-49):</strong> <span style="margin-left:8px;">3 pts/image</span></div>
+      <div style="display:flex; align-items:center; margin:5px 0;"><span style="font-size:20px; margin-right:8px;">💎</span> <strong>Platinum (50+):</strong> <span style="margin-left:8px;">5 pts/image</span></div>
     </div>
 
     <div id="rewardNotice" class="notification hidden"></div>
@@ -114,6 +126,7 @@
           <h2 id="userName">Name</h2>
           <p style="color:#888;">Email</p>
           <p><span id="profilePoints">0</span> Points ⭐</p>
+          <p id="profileLeague" style="font-size:20px; margin-top:5px;">League: 🥉 Bronze</p>
         </div>
 
         <h3>Account Information</h3>
