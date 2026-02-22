@@ -382,41 +382,6 @@ function navigate(page) {
     document.getElementById("loader").classList.add("hidden");
   }, 1500); // 1 second delay
 
-  // If showing the map page, ensure Leaflet map resizes properly
-  if (page === "map") {
-    setTimeout(() => {
-      if (window._ecoMap) window._ecoMap.invalidateSize && window._ecoMap.invalidateSize();
-    }, 300);
   }
-}
 
-// Initialize Leaflet map (OpenStreetMap) once DOM is ready
-function initLeafletMap() {
-  if (typeof L === 'undefined') return console.warn('Leaflet not loaded');
-  if (window._ecoMap) return; // already initialized
-
-  try {
-    // Create map centered on world view
-    const map = L.map('map', { zoomControl: true });
-    window._ecoMap = map;
-
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Try to center on user's location
-    map.locate({ setView: true, maxZoom: 15 });
-    map.on('locationfound', (e) => {
-      L.marker(e.latlng).addTo(map).bindPopup('You are here').openPopup();
-    });
-
-    // Fallback center
-    map.setView([20, 0], 2);
-  } catch (err) {
-    console.error('Leaflet init error:', err);
-  }
-}
-
-document.addEventListener('DOMContentLoaded', initLeafletMap);
+document.getElementById("map").innerText = "Google Maps will load here...";
