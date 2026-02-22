@@ -423,30 +423,3 @@ function navigate(page) {
 window.addEventListener('DOMContentLoaded', updateMainUserCardVisibility);
 
 document.getElementById("map").innerText = "Google Maps will load here...";
-
-// Robust image setter with graceful fallback
-function setProfileAvatar(url, name) {
-  const avatar = document.getElementById('profileAvatar');
-  if (!avatar) return;
-  if (!url) {
-    avatar.innerHTML = '';
-    avatar.innerText = name ? name.charAt(0).toUpperCase() : '?';
-    return;
-  }
-
-  const img = new Image();
-  img.src = url;
-  img.alt = name || 'Profile Picture';
-  img.style.width = '100%';
-  img.style.height = '100%';
-  img.style.objectFit = 'cover';
-  img.onload = () => {
-    avatar.innerHTML = '';
-    avatar.appendChild(img);
-  };
-  img.onerror = (e) => {
-    console.error('Profile image failed to load:', e, url);
-    avatar.innerHTML = '';
-    avatar.innerText = name ? name.charAt(0).toUpperCase() : '?';
-  };
-}
