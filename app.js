@@ -118,6 +118,19 @@ function toggleLoading(btnId, isLoading) {
 function emailInput() { return document.getElementById("email").value; }
 function passwordInput() { return document.getElementById("password").value; }
 
+// --- LEAGUE TIERS ---
+function getLeagueInfo(points) {
+  if (points >= 50) return { tier: "Platinum", emoji: "💎", multiplier: 5 };
+  if (points >= 25) return { tier: "Gold", emoji: "🥇", multiplier: 3 };
+  if (points >= 10) return { tier: "Silver", emoji: "🥈", multiplier: 2 };
+  return { tier: "Bronze", emoji: "🥉", multiplier: 1 };
+}
+
+function getLeagueDisplay(points) {
+  const league = getLeagueInfo(points);
+  return `${league.emoji} ${league.tier}`;
+}
+
 // --- AUTH OBSERVER ---
 onAuthStateChanged(auth, async (user) => {
   const loginScreen = document.getElementById("loginScreen");
@@ -142,6 +155,11 @@ onAuthStateChanged(auth, async (user) => {
         // also update other points displays
         const pd = document.getElementById("pointsDisplay"); if (pd) pd.innerText = points;
         document.getElementById("profilePoints").innerText = points;
+        
+        // Update league displays
+        const leagueDisplay = getLeagueDisplay(points);
+        const ld = document.getElementById("leagueDisplay"); if (ld) ld.innerText = leagueDisplay;
+        const pl = document.getElementById("profileLeague"); if (pl) pl.innerText = `League: ${leagueDisplay}`;
 
         if (data.profilePic) setProfileAvatar(data.profilePic, data.name);
         else setProfileAvatar(null, data.name);
@@ -173,7 +191,7 @@ function loadLeaderboard() {
   
   const currentUserId = auth.currentUser ? auth.currentUser.uid : null;
 
-  // Load all users and sort client-side (avoids Firestore index requirements)
+  // Load all users and sort client-side
   const q = query(collection(db, "users"));
   
   onSnapshot(q, (snapshot) => {
@@ -214,10 +232,19 @@ function loadLeaderboard() {
         avatar.textContent = user.name ? user.name.charAt(0).toUpperCase() : "?";
       }
 
-      // Name
+      // Name & League wrapper
+      const nameWrapper = document.createElement("div");
+      nameWrapper.style.flex = "1";
+      
       const name = document.createElement("span");
       name.className = "leaderboard-name";
       name.textContent = user.name || "Unknown User";
+      nameWrapper.appendChild(name);
+      
+      const league = document.createElement("div");
+      league.className = "leaderboard-league";
+      league.textContent = getLeagueDisplay(user.points || 0);
+      nameWrapper.appendChild(league);
 
       // Points
       const points = document.createElement("span");
@@ -226,7 +253,7 @@ function loadLeaderboard() {
 
       li.appendChild(rank);
       li.appendChild(avatar);
-      li.appendChild(name);
+      li.appendChild(nameWrapper);
       li.appendChild(points);
 
       // Highlight current user
@@ -290,6 +317,7 @@ window.handleUpload = async function (event) {
   if (!file.type.startsWith("image/")) {
     notice.innerText = "Please upload an image file.";
     notice.classList.remove("hidden");
+    setTimeout(() => notice.classList.add("hidden"), 3000);
     return;
   }
 
@@ -299,20 +327,26 @@ window.handleUpload = async function (event) {
   const userRef = doc(db, "users", user.uid);
   const snap = await getDoc(userRef);
 
-  if (snap.exists() && snap.data().rewardClaimed) {
-    notice.innerText = "Reward already claimed!";
-    notice.classList.remove("hidden");
-    return;
-  }
+  // Calculate points based on league multiplier
+  const currentPoints = snap.data().points || 0;
+  const league = getLeagueInfo(currentPoints);
+  const pointsPerImage = league.multiplier;
+  const newPoints = currentPoints + pointsPerImage;
 
-  await setDoc(userRef, { rewardClaimed: true, points: (snap.data().points || 0) + 10 }, { merge: true });
-  document.getElementById("points").innerText = (snap.data().points || 0) + 10;
-  document.getElementById("profilePoints").innerText = (snap.data().points || 0) + 10;
+  await setDoc(userRef, { points: newPoints }, { merge: true });
+  document.getElementById("points").innerText = newPoints;
+  const pd = document.getElementById("pointsDisplay"); if (pd) pd.innerText = newPoints;
+  document.getElementById("profilePoints").innerText = newPoints;
+  
+  // Update league displays
+  const leagueDisplay = getLeagueDisplay(newPoints);
+  const ld = document.getElementById("leagueDisplay"); if (ld) ld.innerText = leagueDisplay;
+  const pl = document.getElementById("profileLeague"); if (pl) pl.innerText = `League: ${leagueDisplay}`;
 
-  notice.innerText = "✅ File uploaded successfully! Reward verified.";
+  notice.innerText = `✅ Image verified! +${pointsPerImage} points (${league.tier})`;
   notice.classList.remove("hidden");
 
-  setTimeout(() => notice.classList.add("hidden"), 5000);
+  setTimeout(() => notice.classList.add("hidden"), 4000);
 };
 
 // Toggle edit form
@@ -423,3 +457,30 @@ function navigate(page) {
 window.addEventListener('DOMContentLoaded', updateMainUserCardVisibility);
 
 document.getElementById("map").innerText = "Google Maps will load here...";
+
+// Robust image setter with graceful fallback
+function setProfileAvatar(url, name) {
+  const avatar = document.getElementById('profileAvatar');
+  if (!avatar) return;
+  if (!url) {
+    avatar.innerHTML = '';
+    avatar.innerText = name ? name.charAt(0).toUpperCase() : '?';
+    return;
+  }
+
+  const img = new Image();
+  img.src = url;
+  img.alt = name || 'Profile Picture';
+  img.style.width = '100%';
+  img.style.height = '100%';
+  img.style.objectFit = 'cover';
+  img.onload = () => {
+    avatar.innerHTML = '';
+    avatar.appendChild(img);
+  };
+  img.onerror = (e) => {
+    console.error('Profile image failed to load:', e, url);
+    avatar.innerHTML = '';
+    avatar.innerText = name ? name.charAt(0).toUpperCase() : '?';
+  };
+}
