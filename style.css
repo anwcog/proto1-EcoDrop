@@ -301,6 +301,27 @@ button:disabled { opacity: 0.7; cursor: not-allowed; }
   border-left: 4px solid #27ae60;
 }
 
+/* League Tiers */
+.league-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 14px;
+  margin: 5px 0;
+}
+
+.league-bronze { background: #cd7f32; color: white; }
+.league-silver { background: #c0c0c0; color: #333; }
+.league-gold { background: #ffd700; color: #333; }
+.league-platinum { background: #e5e4e2; color: #333; border: 2px solid #9966cc; }
+
+#leaderboardList .leaderboard-league {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
 /* ===== MOBILE RESPONSIVE STYLES ===== */
 @media (max-width: 768px) {
   /* Global */
